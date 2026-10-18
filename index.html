@@ -93,7 +93,7 @@ input[type=search]{width:100%;padding:9px 12px;border:1px solid var(--line);bord
 <body>
 <header class="top">
   <div class="logo" aria-hidden="true">✦</div>
-  <div><h1>Карта истоков</h1><p>Нажмите на игрока, затем на исток. Справка — кнопка «?» на карте.</p></div>
+  <div><h1>Карта истоков</h1><p>Перемещать игроков может только администратор. Справка — кнопка «?» на карте.</p></div>
 </header>
 <div class="app">
   <div class="stage">
@@ -125,7 +125,7 @@ input[type=search]{width:100%;padding:9px 12px;border:1px solid var(--line);bord
     </div></details>
     <details class="sec"><summary>🏷 Категории мест</summary><div class="body"><div class="chips" id="cat_f"></div></div></details>
     <details class="sec" id="sec_adm" open><summary>🔐 Админ</summary><div class="body">
-      <div id="adm_out"><p class="note">Редактировать карту, добавлять и удалять игроков может только администратор. Остальные посетители смотрят карту, двигают своих игроков и правят их анкеты.</p><div class="btns"><button id="adm_login" class="pbtn pri">Войти</button></div></div>
+      <div id="adm_out"><p class="note">Редактировать карту, добавлять и удалять игроков может только администратор. Остальные посетители могут только просматривать карту и игроков.</p><div class="btns"><button id="adm_login" class="pbtn pri">Войти</button></div></div>
       <div id="adm_in" hidden>
         <p class="note">✅ Вы вошли как администратор.</p>
         <div class="btns"><button id="adm_logout" class="pbtn">Выйти</button></div>
@@ -198,7 +198,7 @@ input[type=search]{width:100%;padding:9px 12px;border:1px solid var(--line);bord
  <div class="card">
   <h2>Как пользоваться картой</h2>
   <p><b>Карта.</b> Тяните мышью или пальцем, чтобы двигать. Колесо или щипок меняют масштаб. Клавиши: стрелки, + и −, 0 или Home для общего вида, Esc закрывает окна.</p>
-  <p><b>Игроки.</b> Добавляет и удаляет игроков администратор. Нажмите на игрока, затем на исток, и он отправится туда. В пути он проводит время, оно зависит от расстояния. Между мирами можно ходить только во время схождения.</p>
+  <p><b>Игроки.</b> Добавляет и удаляет игроков администратор. Только администратор может выбрать игрока и отправить его к истоку. В пути он проводит время, оно зависит от расстояния. Между мирами можно ходить только во время схождения.</p>
   <p><b>Редактор.</b> Доступен только администратору: войдите в разделе «Админ». Инструменты: выбрать и изменить любой объект, места с категориями, зоны, линии, карандаш, двигать, стереть, отменить. Там же названия миров, настройки цикла и событий.</p>
   <p><b>Микро-ивенты.</b> Кометы, метеоры, вспышки и другие эффекты. Они только красивые и ничего не меняют на карте. Кнопка ✨ включает и выключает их. Раз в час на 15 секунд сквозь пустоту проплывает левиафан: он съедает маленькое свечение и уплывает, сферы не трогает.</p>
   <div class="row"><button type="button" class="pbtn" id="hm_close">Понятно</button></div>
@@ -322,11 +322,11 @@ function plInfo(){var L=document.getElementById("plist");L.innerHTML="";
   var H=document.getElementById("pl");if(!cur){H.innerHTML="<small>Игроков нет. Нажмите «Добавить игрока».</small>";return}
   var f=[["Раса",cur.race],["Возраст",cur.age]].filter(function(x){return x[1]}).map(function(x){return "<b>"+x[0]+":</b> "+esc(x[1])}).join("<br>");
   var S=[["Приобретённые способности",cur.acq],["Пассивные способности",cur.pas],["Расовые способности",cur.rac],["Знания и умения",cur.kno],["Артефакты и предметы",cur.art]].filter(function(x){return x[1]}).map(function(x){return "<p><b>"+x[0]+"</b><br>"+esc(x[1]).replace(/\n/g,"<br>")+"</p>"}).join("");
-  H.innerHTML="<h2>"+esc(cur.name)+(plSel?" · выбран":"")+"</h2><small>"+zoneOf(cur.x,cur.y)+" · x "+Math.round(cur.x)+", y "+Math.round(cur.y)+"</small><div id='pl_eta' class='eta'></div><div class='bar'><i id='pl_bar'></i></div>"+(f?"<p>"+f+"</p>":"")+S+(cur.tr&&(!API||ADMIN)?'<button class="pbtn" id="pst">Остановиться</button> ':"")+(ADMIN?'<button class="pbtn" id="pd">Удалить игрока</button>':"");
-  var pst=document.getElementById("pst");if(pst)pst.onclick=function(){cur.tr=null;setW(cur,wOf(cur.x,cur.y),cur.x,cur.y);save();plInfo()};
+  H.innerHTML="<h2>"+esc(cur.name)+(plSel?" · выбран":"")+"</h2><small>"+zoneOf(cur.x,cur.y)+" · x "+Math.round(cur.x)+", y "+Math.round(cur.y)+"</small><div id='pl_eta' class='eta'></div><div class='bar'><i id='pl_bar'></i></div>"+(f?"<p>"+f+"</p>":"")+S+(cur.tr&&ADMIN?'<button class="pbtn" id="pst">Остановиться</button> ':"")+(ADMIN?'<button class="pbtn" id="pd">Удалить игрока</button>':"");
+  var pst=document.getElementById("pst");if(pst)pst.onclick=function(){if(!need())return;cur.tr=null;setW(cur,wOf(cur.x,cur.y),cur.x,cur.y);save();plInfo()};
   var pdb=document.getElementById("pd");if(pdb)pdb.onclick=function(){if(this.dataset.c!=="1"){this.dataset.c="1";this.textContent="Нажмите ещё раз для удаления";return}PLAYERS.splice(PLAYERS.indexOf(cur),1);cur=PLAYERS[0]||null;plSel=false;save();plInfo();draw()}}
 function nearStar(mx,my,maxd){var bx=null,bd=maxd;for(var c=0;c<B.length;c++){var A=B[c];for(var j=0,jn=Math.floor(A.length/3*lodF)*3;j<jn;j+=3){var dx=A[j]*k+ox-mx;if(dx>bd||dx<-bd)continue;var dy=A[j+1]*k+oy-my,d=Math.hypot(dx,dy);if(d<bd){bd=d;bx=[A[j],A[j+1],-1]}}}BUBBLES.forEach(function(b,bi){for(var q=0;q<2;q++){var A=b.st[q];for(var j=0,jn=Math.floor(A.length/3*lodF)*3;j<jn;j+=3){var px=b.cx+A[j],py=b.cy+A[j+1],dx=px*k+ox-mx;if(dx>bd||dx<-bd)continue;var dy=py*k+oy-my,d=Math.hypot(dx,dy);if(d<bd){bd=d;bx=[px,py,bi]}}}});return bx}
-function moveTo(x,y,w){var p=cur;if(!p)return;if(API&&!ADMIN){toast("Игроков перемещает администратор");return}if(w!==(p.b>=0?p.b:-1)&&conv().st!==1){toast("Миры разъединены. Переход между мирами возможен только во время схождения.");return}
+function moveTo(x,y,w){var p=cur;if(!p)return;if(!ADMIN){toast("Игроков перемещает только администратор");return}if(w!==(p.b>=0?p.b:-1)&&conv().st!==1){toast("Миры разъединены. Переход между мирами возможен только во время схождения.");return}
   var d=Math.hypot(x-p.x,y-p.y),fb=p.b>=0?p.b:-1;
   p.tr={t0:Date.now(),dur:Math.max(TRAVEL.min,d/TRAVEL.speed*1000),w:w,fb:fb,fx:fb>=0?p.x-BUBBLES[fb].cx:p.x,fy:fb>=0?p.y-BUBBLES[fb].cy:p.y,tx:w>=0?x-BUBBLES[w].cx:x,ty:w>=0?y-BUBBLES[w].cy:y};
   plSel=false;save();plInfo();startTrav()}
@@ -554,7 +554,7 @@ window.addEventListener("pointerup",function(e){if(!P[e.pointerId])return;delete
   if(moved<5&&e.target===cv){var r=cv.getBoundingClientRect(),mx=e.clientX-r.left,my=e.clientY-r.top,best=null,bd=18;
     if(editOn&&tool==="sel"){var hh=hitUser(mx,my);if(hh){hh.kind==="star"?openStar(hh.o):openZone(hh.o);return}var bn=null,bdd=14;NAMED.forEach(function(n){if(n[4])return;var d=Math.hypot(n[1]*k+ox-mx,n[2]*k+oy-my);if(d<bdd){bdd=d;bn=n}});if(bn)openBuiltin(bn);return}if(editOn&&tool==="move")return;if(editOn&&tool==="erase"){var h=hitUser(mx,my);if(h){snap();var a=h.kind==="star"?CST:UZ;a.splice(a.indexOf(h.o),1);saveEd();syncNamed();draw()}return}if(editOn){var hs=null;CST.forEach(function(s){if(Math.hypot(s.x*k+ox-mx,s.y*k+oy-my)<14)hs=s});if(hs){openStar(hs);return}if(tool==="star"){openStar({x:(mx-ox)/k,y:(my-oy)/k});return}}
     if(1){var hp=null;PLAYERS.forEach(function(p){if(Math.hypot(p.x*k+ox-mx,p.y*k+oy-my)<16)hp=p});
-      if(hp){if(API&&!ADMIN){cur=hp;plSel=false}else if(hp===cur)plSel=!plSel;else{cur=hp;plSel=true}plInfo();draw();return}
+      if(hp){if(!ADMIN){cur=hp;plSel=false}else if(hp===cur)plSel=!plSel;else{cur=hp;plSel=true}plInfo();draw();return}
       if(plSel){var tg=null,nd=18;NAMED.forEach(function(n){var d=Math.hypot(n[1]*k+ox-mx,n[2]*k+oy-my);if(d<nd){nd=d;tg=[n[1],n[2],n.b>=0?n.b:-1]}});if(!tg)tg=nearStar(mx,my,28);if(tg){moveTo(tg[0],tg[1],tg[2])}return}}
     NAMED.forEach(function(n){var d=Math.hypot(n[1]*k+ox-mx,n[2]*k+oy-my);if(d<bd){bd=d;best=n}});
     if(best)document.getElementById("info").innerHTML="<h2>"+esc(best[0])+"</h2><small>"+esc(zoneOf(best[1],best[2]))+(best[4]?" · "+esc(catOf(best[5]).e+" "+catOf(best[5]).n):"")+" · x "+Math.round(best[1])+", y "+Math.round(best[2])+"</small><p>"+esc(best[3])+"</p>";else{var wx=(mx-ox)/k,wy=(my-oy)/k,zq=null;UZ.forEach(function(z){if(inZ(z,wx,wy))zq=z});$("info").innerHTML="<h2>"+esc(zoneOf(wx,wy))+"</h2><small>x "+Math.round(wx)+", y "+Math.round(wy)+"</small>"+(zq&&zq.desc?"<p>"+esc(zq.desc).replace(/\n/g,"<br>")+"</p>":"")}}});
